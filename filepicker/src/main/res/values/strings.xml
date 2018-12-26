@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">FileChooser</string>
+    <string name="show_hidden_files">Show Hidden Files</string>
+</resources>
