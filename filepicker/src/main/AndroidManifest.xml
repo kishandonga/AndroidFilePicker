@@ -8,7 +8,7 @@
         android:allowBackup="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.FilePickerAct" />
+        <activity android:name=".ui.FilePickerActivity" />
 
     </application>
 

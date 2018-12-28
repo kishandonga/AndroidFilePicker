@@ -18,17 +18,19 @@ import com.kdonga.filepicker.R
 import com.kdonga.filepicker.adapter.FileListAdapter
 import com.kdonga.filepicker.model.HistoryEntry
 import com.kdonga.filepicker.model.ListItemModel
+import com.kdonga.filepicker.utility.SizeUnit
 import com.kdonga.filepicker.utility.Utils.collapseView
 import com.kdonga.filepicker.utility.Utils.compareExtension
 import com.kdonga.filepicker.utility.Utils.expandView
-import com.kdonga.filepicker.utility.Utils.formatFileSize
 import com.kdonga.filepicker.utility.Utils.getRootSubtitle
 import com.kdonga.filepicker.utility.extension
+import com.kdonga.filepicker.widget.FilePicker
 import kotlinx.android.synthetic.main.frg_document_select_layout.*
 import kotlinx.android.synthetic.main.frg_document_select_layout.view.*
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.collections.ArrayList
 
 class DirectoryFragment : Fragment() {
@@ -42,12 +44,14 @@ class DirectoryFragment : Fragment() {
     private var action: OnDocumentSelectAction? = null
     private val items = ArrayList<ListItemModel>()
     private val history = ArrayList<HistoryEntry>()
-    private val sizeLimit = (1024 * 1024 * 1024).toLong()
     private val dateFormat = SimpleDateFormat("dd MMM HH:mm a", Locale.US)
-    private val allowedFileType = arrayListOf("jpg", "png", "gif", "jpeg") //ArrayList<String>()
     private var showHiddenFiles = false
     private val handler: Handler = Handler(Looper.getMainLooper())
     private val imageFileExt = arrayListOf("jpg", "png", "gif", "jpeg")
+
+    private val sizeLimit = FilePicker.builder.fileSelectionSizeLimit
+    private val allowedFileType = FilePicker.builder.allowedFileExtension
+    private val fileSizeErrorMsg = FilePicker.builder.sizeLimitErrorMessage
 
     private val receiver = object : BroadcastReceiver() {
 
@@ -150,17 +154,15 @@ class DirectoryFragment : Fragment() {
                         showMessage("AccessError")
                         return
                     }
-
                     if (file.length() > sizeLimit) {
-                        showMessage("FileUploadLimit")
+                        showMessage(fileSizeErrorMsg)
                         return
                     }
-
                     if (file.length() == 0L) {
                         return
                     }
 
-                    action?.onFileSelected(file.absolutePath)
+                    action?.onFileSelected(file)
                 }
             }
         })
@@ -312,7 +314,7 @@ class DirectoryFragment : Fragment() {
                     item.isFile = true
                     item.extension = ext.toUpperCase()
                     item.dateTime = dateFormat.format(Date(file.lastModified()))
-                    item.fileSize = formatFileSize(file.length())
+                    item.fileSize = SizeUnit.formatFileSize(file.length())
 
                     if (compareExtension(imageFileExt, ext)) {
                         item.thumbFilePath = file.absolutePath
@@ -375,24 +377,27 @@ class DirectoryFragment : Fragment() {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    fun showMessage(error: String) {
+    private fun showMessage(error: String) {
         tvInfoMsgText.text = error
         val anim = expandView(llInfoView)
         anim.addListener(object : Animator.AnimatorListener {
             override fun onAnimationRepeat(p0: Animator?) {}
-
             override fun onAnimationEnd(p0: Animator?) {
                 handler.postDelayed({ collapseView(llInfoView) }, 3000)
             }
 
             override fun onAnimationCancel(p0: Animator?) {}
-
             override fun onAnimationStart(p0: Animator?) {}
         })
     }
 
+    inner class CustomMessage : ConcurrentLinkedQueue<String>() {
+        init {
+        }
+    }
+
     interface OnDocumentSelectAction {
-        fun onFileSelected(path: String)
+        fun onFileSelected(file: File)
 
         fun onTitleUpdate(name: String)
     }

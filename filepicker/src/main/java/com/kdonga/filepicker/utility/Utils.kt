@@ -14,19 +14,7 @@ object Utils {
         val free = stat.availableBlocksLong * stat.blockSizeLong
         return if (total == 0L) {
             ""
-        } else formatFileSize(free) + " / " + formatFileSize(total)
-    }
-
-    fun formatFileSize(size: Long): String {
-        return if (size < 1024) {
-            String.format("%d B", size)
-        } else if (size < 1024 * 1024) {
-            String.format("%.1f KB", size / 1024.0f)
-        } else if (size < 1024 * 1024 * 1024) {
-            String.format("%.1f MB", size.toFloat() / 1024.0f / 1024.0f)
-        } else {
-            String.format("%.1f GB", size.toFloat() / 1024.0f / 1024.0f / 1024.0f)
-        }
+        } else SizeUnit.formatFileSize(free) + " / " + SizeUnit.formatFileSize(total)
     }
 
     fun compareExtension(extTypes: List<String>, desired: String): Boolean {

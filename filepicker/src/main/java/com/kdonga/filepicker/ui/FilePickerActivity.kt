@@ -5,25 +5,30 @@ import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import android.view.MenuItem
 import com.kdonga.filepicker.R
+import com.kdonga.filepicker.callback.OnFilePickerAction
 import com.kdonga.filepicker.fragment.DirectoryFragment
+import com.kdonga.filepicker.widget.FilePicker
+import java.io.File
 
-class FilePickerAct : AppCompatActivity() {
+class FilePickerActivity : AppCompatActivity() {
 
     private lateinit var dirFrg: DirectoryFragment
-    private val defaultTitle = "MY FILES"
+    private var defaultTitle = ""
+    private var pickerAction: OnFilePickerAction? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_file_picker)
-
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        defaultTitle = FilePicker.builder.title
+        pickerAction = FilePicker.pickerAction
         title = defaultTitle
 
         dirFrg = DirectoryFragment()
         dirFrg.setOnDocumentSelectAction(object : DirectoryFragment.OnDocumentSelectAction {
 
-            override fun onFileSelected(path: String) {
-                dirFrg.showMessage(path)
+            override fun onFileSelected(file: File) {
+                pickerAction?.onFileSelected(file)
             }
 
             override fun onTitleUpdate(name: String) {
