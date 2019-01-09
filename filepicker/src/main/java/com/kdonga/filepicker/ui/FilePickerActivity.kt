@@ -18,7 +18,7 @@ class FilePickerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_file_picker)
+        setContentView(R.layout.fp_activity_file_picker)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         defaultTitle = FilePicker.builder.title
         pickerAction = FilePicker.pickerAction

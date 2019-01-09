@@ -1,52 +1,42 @@
 package com.kdonga.filepicker.fragment
 
-import android.animation.Animator
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.os.Environment
-import android.os.Handler
-import android.os.Looper
+import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v7.widget.RecyclerView
 import android.view.*
 import android.view.animation.AnimationUtils
-import android.widget.LinearLayout
 import com.kdonga.filepicker.R
 import com.kdonga.filepicker.adapter.FileListAdapter
 import com.kdonga.filepicker.model.HistoryEntry
 import com.kdonga.filepicker.model.ListItemModel
 import com.kdonga.filepicker.utility.SizeUnit
-import com.kdonga.filepicker.utility.Utils.collapseView
 import com.kdonga.filepicker.utility.Utils.compareExtension
-import com.kdonga.filepicker.utility.Utils.expandView
 import com.kdonga.filepicker.utility.Utils.getRootSubtitle
 import com.kdonga.filepicker.utility.extension
 import com.kdonga.filepicker.widget.FilePicker
-import kotlinx.android.synthetic.main.frg_document_select_layout.*
-import kotlinx.android.synthetic.main.frg_document_select_layout.view.*
+import kotlinx.android.synthetic.main.fp_frg_document_select_layout.*
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.collections.ArrayList
 
 class DirectoryFragment : Fragment() {
 
+    private lateinit var listAdapter: FileListAdapter
     private var receiverRegistered = false
     private var title: String = ""
     private var currentDir: File? = null
-    private lateinit var rvFileList: RecyclerView
-    private lateinit var listAdapter: FileListAdapter
-    private lateinit var llEmptyView: LinearLayout
     private var action: OnDocumentSelectAction? = null
     private val items = ArrayList<ListItemModel>()
     private val history = ArrayList<HistoryEntry>()
     private val dateFormat = SimpleDateFormat("dd MMM HH:mm a", Locale.US)
     private var showHiddenFiles = false
-    private val handler: Handler = Handler(Looper.getMainLooper())
     private val imageFileExt = arrayListOf("jpg", "png", "gif", "jpeg")
 
     private val sizeLimit = FilePicker.builder.fileSelectionSizeLimit
@@ -61,7 +51,7 @@ class DirectoryFragment : Fragment() {
             }
 
             if (Intent.ACTION_MEDIA_UNMOUNTED == intent.action) {
-                rvFileList.postDelayed(r, 1000)
+                rvFiles.postDelayed(r, 1000)
             } else {
                 r.run()
             }
@@ -71,9 +61,9 @@ class DirectoryFragment : Fragment() {
     private fun refreshFileDir() {
         try {
             if (currentDir == null) {
-                listRoots(R.anim.layout_anim_from_bottom)
+                listRoots(R.anim.fp_layout_anim_from_bottom)
             } else {
-                listFiles(currentDir, R.anim.layout_anim_from_bottom)
+                listFiles(currentDir, R.anim.fp_layout_anim_from_bottom)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -86,11 +76,11 @@ class DirectoryFragment : Fragment() {
             title = he.title
             action?.onTitleUpdate(title)
             if (he.dir != null) {
-                listFiles(he.dir, R.anim.layout_anim_from_left)
+                listFiles(he.dir, R.anim.fp_layout_anim_from_left)
             } else {
-                listRoots(R.anim.layout_anim_from_left)
+                listRoots(R.anim.fp_layout_anim_from_left)
             }
-            rvFileList.scrollToPosition(he.scrollToPosition)
+            rvFiles.scrollToPosition(he.scrollToPosition)
             false
         } else {
             true
@@ -114,17 +104,20 @@ class DirectoryFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         registerReceiver()
-        return inflater.inflate(R.layout.frg_document_select_layout, container, false)
+        return inflater.inflate(R.layout.fp_frg_document_select_layout, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        llEmptyView = view.llEmptyView!!
-        rvFileList = view.rvFileList!!
+        val note = FilePicker.builder.showNotes
+        if (note.isNotEmpty() && note.isNotBlank()) {
+            tvInfoMsgText.text = note
+            llInfoView.visibility = View.VISIBLE
+        }
 
         listAdapter = FileListAdapter(items)
-        rvFileList.adapter = listAdapter
+        rvFiles.adapter = listAdapter
 
         listAdapter.setOnItemClickListener(object : FileListAdapter.OnItemClickListener {
             override fun onItemClick(item: ListItemModel, position: Int) {
@@ -141,7 +134,7 @@ class DirectoryFragment : Fragment() {
                     he.dir = currentDir
                     he.title = title
                     action?.onTitleUpdate(title)
-                    if (!listFiles(file, R.anim.layout_anim_from_right)) {
+                    if (!listFiles(file, R.anim.fp_layout_anim_from_right)) {
                         return
                     }
                     history.add(he)
@@ -167,12 +160,7 @@ class DirectoryFragment : Fragment() {
             }
         })
 
-        btnCloseInfoView.setOnClickListener {
-            handler.removeCallbacksAndMessages(null)
-            collapseView(llInfoView)
-        }
-
-        listRoots(R.anim.layout_anim_from_right)
+        listRoots(R.anim.fp_layout_anim_from_right)
     }
 
     private fun applyLayoutAnimation(recyclerView: RecyclerView, animation: Int) {
@@ -212,10 +200,10 @@ class DirectoryFragment : Fragment() {
             val ext = ListItemModel()
             if (Environment.isExternalStorageRemovable()) {
                 ext.title = "SdCard"
-                ext.icon = R.drawable.ic_external_storage
+                ext.icon = R.drawable.fp_ic_external_storage
             } else {
                 ext.title = "Internal Storage"
-                ext.icon = R.drawable.ic_phone_storage
+                ext.icon = R.drawable.fp_ic_phone_storage
             }
             ext.subTitle = getRootSubtitle(defaultPath)
             ext.file = Environment.getExternalStorageDirectory()
@@ -258,7 +246,7 @@ class DirectoryFragment : Fragment() {
                             } else {
                                 item.title = "External Storage"
                             }
-                            item.icon = R.drawable.ic_external_storage
+                            item.icon = R.drawable.fp_ic_external_storage
                             item.subTitle = getRootSubtitle(path)
                             item.file = File(path)
                             items.add(item)
@@ -270,7 +258,7 @@ class DirectoryFragment : Fragment() {
             }
         }
 
-        applyLayoutAnimation(rvFileList, animation)
+        applyLayoutAnimation(rvFiles, animation)
     }
 
     private fun listFiles(dir: File?, animation: Int): Boolean {
@@ -282,11 +270,11 @@ class DirectoryFragment : Fragment() {
             val files = getFilterFiles(fileList)
 
             if (files.isEmpty()) {
-                rvFileList.visibility = View.GONE
+                rvFiles.visibility = View.GONE
                 llEmptyView.visibility = View.VISIBLE
             } else {
                 llEmptyView.visibility = View.GONE
-                rvFileList.visibility = View.VISIBLE
+                rvFiles.visibility = View.VISIBLE
             }
 
             Arrays.sort(files) { lhs, rhs ->
@@ -303,7 +291,7 @@ class DirectoryFragment : Fragment() {
 
                 if (file.isDirectory) {
                     item.isDirectory = true
-                    item.icon = R.drawable.ic_directory
+                    item.icon = R.drawable.fp_ic_directory
                     item.dateTime = dateFormat.format(Date(file.lastModified()))
                     item.totalSubItem = getFilterFiles(file.listFiles()).size
                     items.add(item)
@@ -324,7 +312,7 @@ class DirectoryFragment : Fragment() {
                 }
             }
 
-            applyLayoutAnimation(rvFileList, animation)
+            applyLayoutAnimation(rvFiles, animation)
             return true
 
         } catch (e: Exception) {
@@ -363,7 +351,7 @@ class DirectoryFragment : Fragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        inflater?.inflate(R.menu.menu_file_explorer, menu)
+        inflater?.inflate(R.menu.fp_menu, menu)
         val checkBox = menu?.getItem(0) as MenuItem
         checkBox.setOnMenuItemClickListener {
             checkBox.isChecked = !checkBox.isChecked
@@ -378,22 +366,7 @@ class DirectoryFragment : Fragment() {
     }
 
     private fun showMessage(error: String) {
-        tvInfoMsgText.text = error
-        val anim = expandView(llInfoView)
-        anim.addListener(object : Animator.AnimatorListener {
-            override fun onAnimationRepeat(p0: Animator?) {}
-            override fun onAnimationEnd(p0: Animator?) {
-                handler.postDelayed({ collapseView(llInfoView) }, 3000)
-            }
-
-            override fun onAnimationCancel(p0: Animator?) {}
-            override fun onAnimationStart(p0: Animator?) {}
-        })
-    }
-
-    inner class CustomMessage : ConcurrentLinkedQueue<String>() {
-        init {
-        }
+        Snackbar.make(rootLayout, error, Snackbar.LENGTH_SHORT).show()
     }
 
     interface OnDocumentSelectAction {

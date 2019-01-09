@@ -10,7 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.kdonga.filepicker.R
 import com.kdonga.filepicker.model.ListItemModel
-import kotlinx.android.synthetic.main.list_document.view.*
+import kotlinx.android.synthetic.main.fp_list_document.view.*
 import java.util.*
 
 class FileListAdapter(private val items: ArrayList<ListItemModel>) : RecyclerView.Adapter<FileListAdapter.ViewHolder>() {
@@ -23,7 +23,7 @@ class FileListAdapter(private val items: ArrayList<ListItemModel>) : RecyclerVie
 
     override fun onCreateViewHolder(parent: ViewGroup, i: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context)
-                .inflate(R.layout.list_document, parent, false))
+                .inflate(R.layout.fp_list_document, parent, false))
     }
 
     override fun onBindViewHolder(holder: ViewHolder, i: Int) {

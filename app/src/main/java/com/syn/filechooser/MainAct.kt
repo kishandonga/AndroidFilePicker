@@ -17,7 +17,7 @@ class MainAct : AppCompatActivity() {
         val file = FilePicker.Builder()
                 .setAllowedFileExtension(arrayListOf("jpg", "png", "gif", "jpeg"))
                 .setDefaultTitle("MY FILES")
-                .setMaxFileSelectionSize(5, SizeUnit.MB, "Please select file below 5KB")
+                .setMaxFileSelectionSize(5, SizeUnit.KB, "Please select file below 5KB")
                 .build()
 
         file.setOnFilePickerAction(object : OnFilePickerAction {

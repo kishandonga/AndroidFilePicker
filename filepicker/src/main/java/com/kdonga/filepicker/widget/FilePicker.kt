@@ -27,10 +27,11 @@ class FilePicker private constructor(builder: Builder) {
 
     class Builder {
 
-        var allowedFileExtension = listOf<String>()
-        var title: String = "MY FILES"
-        var fileSelectionSizeLimit: Long = 0L
-        var sizeLimitErrorMessage: String = ""
+        internal var allowedFileExtension = listOf<String>()
+        internal var title: String = "MY FILES"
+        internal var fileSelectionSizeLimit: Long = 0L
+        internal var sizeLimitErrorMessage: String = ""
+        internal var showNotes: String = ""
 
         fun setAllowedFileExtension(filesExt: List<String>): Builder {
             allowedFileExtension = filesExt
@@ -45,6 +46,11 @@ class FilePicker private constructor(builder: Builder) {
         fun setMaxFileSelectionSize(value: Int, unit: SizeUnit, errorMessage: String): Builder {
             fileSelectionSizeLimit = value * unit.inBytes()
             sizeLimitErrorMessage = errorMessage
+            return this
+        }
+
+        fun showDefaultNote(note: String): Builder {
+            this.showNotes = note
             return this
         }
 
