@@ -13,22 +13,26 @@ import com.kdonga.filepicker.model.ListItemModel
 import kotlinx.android.synthetic.main.fp_list_document.view.*
 import java.util.*
 
-class FileListAdapter(private val items: ArrayList<ListItemModel>) : RecyclerView.Adapter<FileListAdapter.ViewHolder>() {
+class FileListAdapter : RecyclerView.Adapter<FileListAdapter.ViewHolder>() {
 
     private var listener: OnItemClickListener? = null
+    private var items: ArrayList<ListItemModel> = arrayListOf()
+
+    fun setItems(items: ArrayList<ListItemModel>) {
+        this.items = items
+        notifyDataSetChanged()
+    }
 
     fun setOnItemClickListener(onItemClickListener: OnItemClickListener) {
         this.listener = onItemClickListener
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, i: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context)
-                .inflate(R.layout.fp_list_document, parent, false))
+        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.fp_list_document, parent, false))
     }
 
     override fun onBindViewHolder(holder: ViewHolder, i: Int) {
-        val item = items[i]
-        holder.bindTo(item, listener)
+        holder.bindTo(items[i], listener)
     }
 
     override fun getItemCount(): Int {

@@ -16,15 +16,14 @@ class MainAct : AppCompatActivity() {
 
         val file = FilePicker.Builder()
                 .setAllowedFileExtension(arrayListOf("jpg", "png", "gif", "jpeg"))
-                .setDefaultTitle("MY FILES")
+                .setDefaultTitle("")
                 .setMaxFileSelectionSize(5, SizeUnit.KB, "Please select file below 5KB")
-                .build()
+                .setOnFilePickerAction(object : OnFilePickerAction {
+                    override fun onFileSelected(file: File) {
 
-        file.setOnFilePickerAction(object : OnFilePickerAction {
-            override fun onFileSelected(file: File) {
+                    }
+                }).build()
 
-            }
-        })
 
         btnStart.setOnClickListener {
             file.start(this)

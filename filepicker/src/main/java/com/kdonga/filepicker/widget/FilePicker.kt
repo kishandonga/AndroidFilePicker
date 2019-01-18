@@ -6,23 +6,32 @@ import com.kdonga.filepicker.callback.OnFilePickerAction
 import com.kdonga.filepicker.ui.FilePickerActivity
 import com.kdonga.filepicker.utility.SizeUnit
 
-class FilePicker private constructor(builder: Builder) {
+class FilePicker private constructor() {
 
     companion object {
-        internal var pickerAction: OnFilePickerAction? = null
-        internal lateinit var builder: Builder
+        @Volatile
+        private var instance: FilePicker? = null
+
+        internal fun getInstance() = instance ?: synchronized(this) {
+            instance ?: FilePicker().also { instance = it }
+        }
     }
 
-    init {
-        FilePicker.builder = builder
-    }
-
-    fun setOnFilePickerAction(pickerAction: OnFilePickerAction?) {
-        FilePicker.pickerAction = pickerAction
-    }
+    private var builder: Builder? = null
 
     fun start(context: Context) {
+        if (builder == null) {
+            throw RuntimeException("First initialize builder of the filepicker then after call the start method!")
+        }
         context.startActivity(Intent(context, FilePickerActivity::class.java))
+    }
+
+    internal fun setBuilder(builder: Builder?) {
+        this.builder = builder
+    }
+
+    internal fun getBuilder(): Builder? {
+        return builder
     }
 
     class Builder {
@@ -31,31 +40,38 @@ class FilePicker private constructor(builder: Builder) {
         internal var title: String = "MY FILES"
         internal var fileSelectionSizeLimit: Long = 0L
         internal var sizeLimitErrorMessage: String = ""
-        internal var showNotes: String = ""
+        internal var pickerAction: OnFilePickerAction? = null
+
+        companion object {
+            @Volatile
+            private var instance: Builder = Builder()
+        }
+
+        fun setOnFilePickerAction(pickerAction: OnFilePickerAction?): Builder {
+            instance.pickerAction = pickerAction
+            return this
+        }
 
         fun setAllowedFileExtension(filesExt: List<String>): Builder {
-            allowedFileExtension = filesExt
+            instance.allowedFileExtension = filesExt
             return this
         }
 
         fun setDefaultTitle(title: String): Builder {
-            this.title = title
+            instance.title = title
             return this
         }
 
         fun setMaxFileSelectionSize(value: Int, unit: SizeUnit, errorMessage: String): Builder {
-            fileSelectionSizeLimit = value * unit.inBytes()
-            sizeLimitErrorMessage = errorMessage
-            return this
-        }
-
-        fun showDefaultNote(note: String): Builder {
-            this.showNotes = note
+            instance.fileSelectionSizeLimit = value * unit.inBytes()
+            instance.sizeLimitErrorMessage = errorMessage
             return this
         }
 
         fun build(): FilePicker {
-            return FilePicker(this)
+            val file = FilePicker.getInstance()
+            file.setBuilder(Builder.instance)
+            return file
         }
     }
 }

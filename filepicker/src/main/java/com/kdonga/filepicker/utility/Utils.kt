@@ -2,7 +2,6 @@ package com.kdonga.filepicker.utility
 
 import android.os.StatFs
 
-
 object Utils {
 
     fun getRootSubtitle(path: String): String {
