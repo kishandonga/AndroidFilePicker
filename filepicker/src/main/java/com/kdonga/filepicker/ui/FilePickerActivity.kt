@@ -52,9 +52,7 @@ class FilePickerActivity : AppCompatActivity() {
     private val receiver = object : BroadcastReceiver() {
 
         override fun onReceive(arg0: Context, intent: Intent) {
-            val r = Runnable {
-                refreshFileDir()
-            }
+            val r = Runnable { refreshFileDir() }
 
             if (Intent.ACTION_MEDIA_UNMOUNTED == intent.action) {
                 rvFiles.postDelayed(r, 1000)
@@ -97,7 +95,7 @@ class FilePickerActivity : AppCompatActivity() {
                 } else {
 
                     if (!file.canRead()) {
-                        showMessage("AccessError")
+                        showMessage(getString(R.string.access_error))
                         return
                     }
                     if (file.length() > sizeLimit) {
@@ -105,6 +103,7 @@ class FilePickerActivity : AppCompatActivity() {
                         return
                     }
                     if (file.length() == 0L) {
+                        showMessage(getString(R.string.empty_file_error))
                         return
                     }
 
