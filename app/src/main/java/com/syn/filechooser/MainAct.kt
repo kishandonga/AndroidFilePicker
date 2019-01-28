@@ -1,12 +1,11 @@
 package com.syn.filechooser
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import com.kdonga.filepicker.callback.OnFilePickerAction
 import com.kdonga.filepicker.utility.SizeUnit
 import com.kdonga.filepicker.widget.FilePicker
 import kotlinx.android.synthetic.main.activity_main.*
-import java.io.File
 
 class MainAct : AppCompatActivity() {
 
@@ -14,19 +13,17 @@ class MainAct : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val file = FilePicker.Builder()
+        val file = FilePicker()
                 .setAllowedFileExtension(arrayListOf("jpg", "png", "gif", "jpeg"))
                 .setDefaultTitle("")
                 .setMaxFileSelectionSize(5, SizeUnit.KB, "Please select file below 5KB")
-                .setOnFilePickerAction(object : OnFilePickerAction {
-                    override fun onFileSelected(file: File) {
-
-                    }
-                }).build()
-
 
         btnStart.setOnClickListener {
-            file.start(this)
+            file.startFilePickerActivityForResult(this, 123)
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
     }
 }

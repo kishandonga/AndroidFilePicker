@@ -1,5 +1,6 @@
 package com.kdonga.filepicker.ui
 
+import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -13,7 +14,6 @@ import android.view.MenuItem
 import android.view.animation.AnimationUtils
 import com.kdonga.filepicker.R
 import com.kdonga.filepicker.adapter.FileListAdapter
-import com.kdonga.filepicker.callback.OnFilePickerAction
 import com.kdonga.filepicker.model.HistoryEntry
 import com.kdonga.filepicker.model.ListItemModel
 import com.kdonga.filepicker.utility.SizeUnit
@@ -21,6 +21,7 @@ import com.kdonga.filepicker.utility.Utils
 import com.kdonga.filepicker.utility.extension
 import com.kdonga.filepicker.utility.setEmptyView
 import com.kdonga.filepicker.widget.FilePicker
+import com.kdonga.filepicker.widget.FilePicker.Companion.SelectedFilePath
 import kotlinx.android.synthetic.main.fp_activity_file_picker.*
 import java.io.File
 import java.text.SimpleDateFormat
@@ -30,7 +31,6 @@ import kotlin.properties.Delegates
 class FilePickerActivity : AppCompatActivity() {
 
     private var listAdapter: FileListAdapter = FileListAdapter()
-    private var pickerAction: OnFilePickerAction? = null
     private var currentDir: File? = null
     private val items = ArrayList<ListItemModel>()
     private val history = ArrayList<HistoryEntry>()
@@ -107,7 +107,10 @@ class FilePickerActivity : AppCompatActivity() {
                         return
                     }
 
-                    pickerAction?.onFileSelected(file)
+                    val intent = intent
+                    intent.putExtra(SelectedFilePath, file.absolutePath)
+                    setResult(Activity.RESULT_OK, intent)
+                    finish()
                 }
             }
         })
@@ -117,14 +120,11 @@ class FilePickerActivity : AppCompatActivity() {
 
     private fun initView() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        FilePicker.getInstance().getBuilder()?.let {
-            titleUpdate = it.title
-            pickerAction = it.pickerAction
-
-            sizeLimit = it.fileSelectionSizeLimit
-            allowedFileType = it.allowedFileExtension
-            fileSizeErrorMsg = it.sizeLimitErrorMessage
-        }
+        val it = intent.extras
+        titleUpdate = it.getString(FilePicker.DefaultTitle)
+        sizeLimit = it.getLong(FilePicker.FileSizeLimit)
+        allowedFileType = it.getStringArrayList(FilePicker.AllowedFileExt)
+        fileSizeErrorMsg = it.getString(FilePicker.SizeLimitErrorMsg)
     }
 
     private fun refreshFileDir() {
