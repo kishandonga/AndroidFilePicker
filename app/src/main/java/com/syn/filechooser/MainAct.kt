@@ -13,6 +13,7 @@ class MainAct : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // testing commit
         val file = FilePicker()
                 .setAllowedFileExtension(arrayListOf("jpg", "png", "gif", "jpeg"))
                 .setDefaultTitle("")
